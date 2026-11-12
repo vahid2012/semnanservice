@@ -1,0 +1,18 @@
+{
+  "name": "semnan-service",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run generate-images && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "generate-images": "node scripts/generate-images.js"
+  },
+  "dependencies": {
+    "astro": "^5.2.5",
+    "@astrojs/sitemap": "^3.2.1",
+    "sharp": "^0.33.5"
+  }
+}
