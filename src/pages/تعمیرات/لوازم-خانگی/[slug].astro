@@ -1,0 +1,315 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import {
+  appliances,
+  getOtherAppliances,
+  type Appliance,
+} from '../../../data/appliances';
+import {
+  cities,
+  getNeighbors,
+  type City,
+} from '../../../data/cities';
+import {
+  PHONE_NUMBER,
+  SITE_NAME,
+  SITE_URL,
+  generateApplianceHubIntro,
+  generateApplianceHubFaqs,
+  generateCityHubIntro,
+  generateCityHubFaqs,
+  generateLocalBusinessSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  generateServiceSchema,
+  type FaqItem,
+} from '../../../utils/content';
+
+export async function getStaticPaths() {
+  const appliancePaths = appliances.map((appliance) => ({
+    params: { slug: appliance.slug },
+    props: { type: 'appliance' as const, appliance, city: null as City | null },
+  }));
+
+  const cityPaths = cities.map((city) => ({
+    params: { slug: city.slug },
+    props: { type: 'city' as const, city, appliance: null as Appliance | null },
+  }));
+
+  return [...appliancePaths, ...cityPaths];
+}
+
+interface Props {
+  type: 'appliance' | 'city';
+  appliance: Appliance | null;
+  city: City | null;
+}
+
+const { type, appliance, city } = Astro.props as Props;
+
+const isAppliance = type === 'appliance' && appliance !== null;
+const isCity = type === 'city' && city !== null;
+
+let metaTitle = '';
+let metaDesc = '';
+let canonical = '';
+let ogImage = '';
+let h1 = '';
+let intro = '';
+let faqs: FaqItem[] = [];
+let schemas: object[] = [];
+
+if (isAppliance && appliance) {
+  intro = generateApplianceHubIntro(appliance);
+  faqs = generateApplianceHubFaqs(appliance);
+  metaTitle = `تعمیر ${appliance.name} در استان سمنان | امداد فوری ${PHONE_NUMBER}`;
+  metaDesc = `تعمیر ${appliance.name} در تمام شهرهای استان سمنان. تعمیر برندهای ${appliance.brands.slice(0, 3).join('، ')} با قطعات اصل و ضمانت. ${appliance.priceRange}. تماس: ${PHONE_NUMBER}`;
+  canonical = `${SITE_URL}/تعمیرات/لوازم-خانگی/${appliance.slug}/`;
+  ogImage = `${SITE_URL}/images/featured/${appliance.slugEn}-hub.webp`;
+  h1 = `تعمیر ${appliance.name} در استان سمنان`;
+  schemas = [
+    generateLocalBusinessSchema(),
+    generateBreadcrumbSchema([
+      { name: 'خانه', url: SITE_URL },
+      { name: 'تعمیرات لوازم خانگی', url: `${SITE_URL}/تعمیرات/لوازم-خانگی/` },
+      { name: `تعمیر ${appliance.name}`, url: canonical },
+    ]),
+    generateFAQSchema(faqs),
+    generateServiceSchema(appliance, cities[0], ogImage),
+  ];
+} else if (isCity && city) {
+  intro = generateCityHubIntro(city);
+  faqs = generateCityHubFaqs(city);
+  const neighbors = getNeighbors(city.slug);
+  metaTitle = `تعمیر لوازم خانگی در ${city.name} | امداد فوری ${PHONE_NUMBER}`;
+  metaDesc = `تعمیر تمام لوازم خانگی در ${city.name}. تعمیر یخچال، لباسشویی، کولر گازی، پکیج و... با قطعات اصل و ضمانت. تماس: ${PHONE_NUMBER}`;
+  canonical = `${SITE_URL}/تعمیرات/لوازم-خانگی/${city.slug}/`;
+  ogImage = `${SITE_URL}/images/featured/${city.slugEn}-city-hub.webp`;
+  h1 = `تعمیر لوازم خانگی در ${city.name}`;
+  schemas = [
+    generateLocalBusinessSchema(city),
+    generateBreadcrumbSchema([
+      { name: 'خانه', url: SITE_URL },
+      { name: 'تعمیرات لوازم خانگی', url: `${SITE_URL}/تعمیرات/لوازم-خانگی/` },
+      { name: `تعمیر لوازم خانگی در ${city.name}`, url: canonical },
+    ]),
+    generateFAQSchema(faqs),
+  ];
+}
+
+const otherAppliances = appliance ? getOtherAppliances(appliance.slug) : appliances;
+const neighborCities = city ? getNeighbors(city.slug) : [];
+---
+
+<Layout
+  title={metaTitle}
+  description={metaDesc}
+  canonical={canonical}
+  ogImage={ogImage}
+  schemas={schemas}
+  contactName="آقای تعمیر"
+  noindex={isCity && city ? !city.indexed : false}
+>
+  {isAppliance && appliance && (
+    <>
+      <nav class="breadcrumb">
+        <a href="/">خانه</a><span>›</span>
+        <a href="/تعمیرات/لوازم-خانگی/">تعمیرات لوازم خانگی</a><span>›</span>
+        تعمیر {appliance.name}
+      </nav>
+
+      <h1>{h1}</h1>
+
+      <img
+        src={`/images/featured/${appliance.slugEn}-hub.webp`}
+        alt={`تعمیر ${appliance.name} در استان سمنان`}
+        class="featured-image"
+        width="1200"
+        height="675"
+        loading="eager"
+        fetchpriority="high"
+      />
+
+      <div class="intro-section">
+        <p>{intro}</p>
+      </div>
+
+      <div class="cta-box">
+        <p>نیاز به تعمیر فوری {appliance.name} دارید؟</p>
+        <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+      </div>
+
+      <h2>مشکلات رایج {appliance.name}</h2>
+      <ul>
+        {appliance.commonIssues.map((issue) => <li>{issue}</li>)}
+      </ul>
+
+      <h2>برندهای {appliance.name} که تعمیر می‌کنیم</h2>
+      <div class="horizontal-links">
+        {appliance.brands.map((brand) => (
+          <span class="card" style="display:inline-block; padding: 8px 16px;">{brand}</span>
+        ))}
+      </div>
+
+      <img
+        src={`/images/in-content/${appliance.slugEn}-hub-incontent.webp`}
+        alt={`تعمیرکار ${appliance.name} در استان سمنان`}
+        class="in-content-image"
+        width="800"
+        height="600"
+        loading="lazy"
+      />
+
+      <h2>تعمیر {appliance.name} در شهرهای استان سمنان</h2>
+      <p>ما در تمام ۲۲ شهر استان سمنان خدمات تعمیر {appliance.name} را ارائه می‌دهیم:</p>
+      <div class="card-grid">
+        {cities.map((c) => (
+          <div class="card">
+            <h3><a href={`/تعمیرات/لوازم-خانگی/${appliance.slug}/${c.slug}/`}>تعمیر {appliance.name} در {c.name}</a></h3>
+            <p>{c.callout}</p>
+          </div>
+        ))}
+      </div>
+
+      <h2>هزینه تعمیر {appliance.name} در استان سمنان</h2>
+      <p>قیمت تعمیر {appliance.name} در محدوده {appliance.priceRange} است. هزینه بازدید در صورت انجام تعمیر رایگان است.</p>
+
+      <h2>مراحل تعمیر {appliance.name}</h2>
+      <ol>
+        <li>تماس با {PHONE_NUMBER} و ثبت درخواست</li>
+        <li>اعزام تکنسین در کمترین زمان</li>
+        <li>تشخیص خرابی و اعلام هزینه</li>
+        <li>تعمیر با قطعات اصل و ضمانت</li>
+      </ol>
+
+      {appliance.slug === 'لباسشویی' && (
+        <h2>منابع و مراجع تخصصی</h2>
+      )}
+      {appliance.slug === 'لباسشویی' && (
+        <p>برای مطالعه راهنمای تخصصی تعمیر لباسشویی در سایر مناطق، می‌توانید به <a href="https://www.service-sos.ir/category/repair-services-amol/washing-machine-service-amol/" rel="noopener" target="_blank" class="external-link">نمایندگی تعمیر لباسشویی در آمل</a> مراجعه کنید. این منبع شامل راهنماهای فنی مفیدی برای تشخیص و رفع مشکلات ماشین لباسشویی است.</p>
+      )}
+
+      <h2>سایر خدمات تعمیر لوازم خانگی</h2>
+      <div class="horizontal-links">
+        {otherAppliances.map((other) => (
+          <a href={`/تعمیرات/لوازم-خانگی/${other.slug}/`}>تعمیر {other.name}</a>
+        ))}
+      </div>
+
+      <h2>سوالات متداول</h2>
+      <div class="faq-section">
+        {faqs.map((faq) => (
+          <div class="faq-item">
+            <h3>{faq.question}</h3>
+            <p>{faq.answer}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="cta-box">
+        <p>برای تعمیر فوری {appliance.name} در استان سمنان تماس بگیرید</p>
+        <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+      </div>
+
+      <div class="up-links">
+        <p><a href="/تعمیرات/لوازم-خانگی/">← راهنمای کامل تعمیرات لوازم خانگی</a></p>
+        <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+      </div>
+    </>
+  )}
+
+  {isCity && city && (
+    <>
+      <nav class="breadcrumb">
+        <a href="/">خانه</a><span>›</span>
+        <a href="/تعمیرات/لوازم-خانگی/">تعمیرات لوازم خانگی</a><span>›</span>
+        تعمیر لوازم خانگی در {city.name}
+      </nav>
+
+      <h1>{h1}</h1>
+
+      <img
+        src={`/images/featured/${city.slugEn}-city-hub.webp`}
+        alt={`تعمیر لوازم خانگی در ${city.name}`}
+        class="featured-image"
+        width="1200"
+        height="675"
+        loading="eager"
+        fetchpriority="high"
+      />
+
+      <div class="intro-section">
+        <p>{intro}</p>
+      </div>
+
+      <div class="cta-box">
+        <p>نیاز به تعمیر فوری لوازم خانگی در {city.name} دارید؟</p>
+        <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+      </div>
+
+      <h2>خدمات تعمیر لوازم خانگی در {city.name}</h2>
+      <p>ما در {city.name} تعمیر تمام انواع لوازم خانگی را ارائه می‌دهیم:</p>
+      <div class="card-grid">
+        {appliances.map((app) => (
+          <div class="card">
+            <h3><a href={`/تعمیرات/لوازم-خانگی/${app.slug}/${city.slug}/`}>تعمیر {app.name} در {city.name}</a></h3>
+            <p>{app.uniqueIntro.substring(0, 100)}...</p>
+          </div>
+        ))}
+      </div>
+
+      <h2>محله‌های تحت پوشش در {city.name}</h2>
+      <p>تیم سیار ما در تمام محله‌های {city.name} خدمات تعمیر لوازم خانگی ارائه می‌دهد:</p>
+      <div class="horizontal-links">
+        {city.neighborhoods.map((n) => (
+          <span class="card" style="display:inline-block; padding: 8px 16px;">{n}</span>
+        ))}
+      </div>
+
+      <img
+        src={`/images/in-content/${city.slugEn}-city-hub-incontent.webp`}
+        alt={`تعمیر لوازم خانگی در محله‌های ${city.name}`}
+        class="in-content-image"
+        width="800"
+        height="600"
+        loading="lazy"
+      />
+
+      <h2>تأثیر آب‌وهوای {city.name} بر عملکرد لوازم خانگی</h2>
+      <p>شهر {city.name} دارای آب‌وهوای {city.climate} است. این شرایط محیطی می‌تواند روی عملکرد لوازم خانگی تأثیر بگذارد و سرویس منظم آنها را ضروری کند. {city.callout} و ما با تیم سیار خود آماده ارائه خدمات در تمام مناطق {city.name} هستیم.</p>
+
+      <h2>شهرهای همجوار</h2>
+      <div class="horizontal-links">
+        {neighborCities.map((nc) => (
+          <a href={`/تعمیرات/لوازم-خانگی/${nc.slug}/`}>تعمیر لوازم خانگی در {nc.name}</a>
+        ))}
+      </div>
+
+      <h2>سوالات متداول تعمیر لوازم خانگی در {city.name}</h2>
+      <div class="faq-section">
+        {faqs.map((faq) => (
+          <div class="faq-item">
+            <h3>{faq.question}</h3>
+            <p>{faq.answer}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="review-box">
+        <div class="stars">{'★'.repeat(city.localReview.rating)}</div>
+        <p>«{city.localReview.text}»</p>
+        <p class="reviewer">— {city.localReview.customerName}، {city.name} ({city.localReview.date})</p>
+      </div>
+
+      <div class="cta-box">
+        <p>برای تعمیر فوری لوازم خانگی در {city.name} تماس بگیرید</p>
+        <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+      </div>
+
+      <div class="up-links">
+        <p><a href="/تعمیرات/لوازم-خانگی/">← راهنمای کامل تعمیرات لوازم خانگی</a></p>
+        <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+      </div>
+    </>
+  )}
+</Layout>

@@ -1,0 +1,174 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { appliances, getOtherAppliances, type Appliance } from '../../../../data/appliances';
+import { cities, getNeighbors, type City } from '../../../../data/cities';
+import {
+  PHONE_NUMBER,
+  SITE_NAME,
+  SITE_URL,
+  generateLevel3Intro,
+  generateLevel3Faqs,
+  generateLevel3MetaTitle,
+  generateLevel3MetaDescription,
+  generateLevel3Canonical,
+  generateServiceSchema,
+  generateFAQSchema,
+  generateBreadcrumbSchema,
+  generateLocalBusinessSchema,
+  generateContentBody,
+  generateDirectAnswerAppliance,
+} from '../../../../utils/content';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const appliance of appliances) {
+    for (const city of cities) {
+      paths.push({
+        params: { slug: appliance.slug, city: city.slug },
+        props: { appliance, city },
+      });
+    }
+  }
+  return paths;
+}
+
+interface Props {
+  appliance: Appliance;
+  city: City;
+}
+
+const { appliance, city } = Astro.props as Props;
+
+const intro = generateLevel3Intro(appliance, city);
+const faqs = generateLevel3Faqs(appliance, city);
+const sections = generateContentBody(appliance, city);
+const otherAppliances = getOtherAppliances(appliance.slug);
+const neighbors = getNeighbors(city.slug);
+
+// Select 7 other appliances for horizontal links
+const horizontalAppliances = otherAppliances.slice(0, 7);
+
+const metaTitle = generateLevel3MetaTitle(appliance, city);
+const metaDesc = generateLevel3MetaDescription(appliance, city);
+const canonical = generateLevel3Canonical(appliance, city);
+
+// Image URLs use slugEn for filesystem safety
+const featuredImage = `${SITE_URL}/images/featured/${appliance.slugEn}-${city.slugEn}-featured.webp`;
+const inContentImage = `${SITE_URL}/images/in-content/${appliance.slugEn}-${city.slugEn}-incontent.webp`;
+const localImagePath = `/images/featured/${appliance.slugEn}-${city.slugEn}-featured.webp`;
+const localInContentPath = `/images/in-content/${appliance.slugEn}-${city.slugEn}-incontent.webp`;
+
+const directAnswer = generateDirectAnswerAppliance(appliance, city);
+
+const schemas = [
+  generateLocalBusinessSchema(city),
+  generateServiceSchema(appliance, city, featuredImage),
+  generateFAQSchema(faqs),
+  generateBreadcrumbSchema([
+    { name: 'خانه', url: SITE_URL },
+    { name: 'تعمیرات لوازم خانگی', url: `${SITE_URL}/تعمیرات/لوازم-خانگی/` },
+    { name: `تعمیر ${appliance.name}`, url: `${SITE_URL}/تعمیرات/لوازم-خانگی/${appliance.slug}/` },
+    { name: `تعمیر ${appliance.name} در ${city.name}`, url: canonical },
+  ]),
+];
+---
+
+<Layout
+  title={metaTitle}
+  description={metaDesc}
+  canonical={canonical}
+  ogImage={featuredImage}
+  schemas={schemas}
+  contactName="آقای تعمیر"
+  noindex={!city.indexed}
+>
+  <nav class="breadcrumb">
+    <a href="/">خانه</a><span>›</span>
+    <a href="/تعمیرات/لوازم-خانگی/">تعمیرات لوازم خانگی</a><span>›</span>
+    <a href={`/تعمیرات/لوازم-خانگی/${appliance.slug}/`}>تعمیر {appliance.name}</a><span>›</span>
+    تعمیر {appliance.name} در {city.name}
+  </nav>
+
+  <h1>تعمیر {appliance.name} در {city.name}</h1>
+
+  <p class="direct-answer">{directAnswer}</p>
+
+  <img
+    src={localImagePath}
+    alt={`تعمیر ${appliance.name} در ${city.name}`}
+    class="featured-image"
+    width="1200"
+    height="675"
+    loading="eager"
+    fetchpriority="high"
+  />
+
+  <div class="intro-section">
+    <p>{intro}</p>
+  </div>
+
+  <div class="cta-box">
+    <p>نیاز به تعمیر فوری {appliance.name} در {city.name} دارید؟</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  {sections.map((section, index) => (
+    <>
+      {index === 1 && (
+        <img
+          src={localInContentPath}
+          alt={`تعمیرکار ${appliance.name} در ${city.name}`}
+          class="in-content-image"
+          width="800"
+          height="600"
+          loading="lazy"
+        />
+      )}
+      <section class="content-section">
+        <h2>{section.heading}</h2>
+        {section.paragraphs.map((p) => <p set:html={p} />)}
+      </section>
+    </>
+  ))}
+
+  <h2>سوالات متداول درباره تعمیر {appliance.name} در {city.name} چیست؟</h2>
+  <div class="faq-section">
+    {faqs.map((faq) => (
+      <div class="faq-item">
+        <h3>{faq.question}</h3>
+        <p>{faq.answer}</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="review-box">
+    <div class="stars">{'★'.repeat(city.localReview.rating)}</div>
+    <p>«{city.localReview.text}»</p>
+    <p class="reviewer">— {city.localReview.customerName}، {city.name} ({city.localReview.date})</p>
+  </div>
+
+  <h2>سایر خدمات تعمیر در {city.name} چیست؟</h2>
+  <div class="horizontal-links">
+    {horizontalAppliances.map((other) => (
+      <a href={`/تعمیرات/لوازم-خانگی/${other.slug}/${city.slug}/`}>تعمیر {other.name} در {city.name}</a>
+    ))}
+  </div>
+
+  <h2>تعمیر {appliance.name} در شهرهای همجوار {city.name} چگونه است؟</h2>
+  <div class="horizontal-links">
+    {neighbors.map((nc) => (
+      <a href={`/تعمیرات/لوازم-خانگی/${appliance.slug}/${nc.slug}/`}>تعمیر {appliance.name} در {nc.name}</a>
+    ))}
+  </div>
+
+  <div class="cta-box">
+    <p>برای تعمیر فوری {appliance.name} در {city.name} تماس بگیرید</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <div class="up-links">
+    <p><a href={`/تعمیرات/لوازم-خانگی/${appliance.slug}/`}>← تعمیر {appliance.name} در سراسر استان سمنان</a></p>
+    <p><a href="/تعمیرات/لوازم-خانگی/">← راهنمای کامل تعمیرات لوازم خانگی</a></p>
+    <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+  </div>
+</Layout>

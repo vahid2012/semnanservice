@@ -1,0 +1,73 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { blogPosts } from '../../data/blog';
+import {
+  PHONE_NUMBER,
+  SITE_NAME,
+  SITE_URL,
+  generateBreadcrumbSchema,
+} from '../../utils/content';
+
+const canonical = `${SITE_URL}/بلاگ/`;
+const ogImage = `${SITE_URL}/images/blog/blog-hub-featured.webp`;
+
+const schemas = [
+  generateBreadcrumbSchema([
+    { name: 'خانه', url: SITE_URL },
+    { name: 'بلاگ', url: canonical },
+  ]),
+];
+
+const metaTitle = `بلاگ سمنان سرویس | راهنمای تعمیر لوازم خانگی و امداد خودرو`;
+const metaDesc = `مقالات تخصصی درباره تعمیر لوازم خانگی، امداد خودرو و یدک‌کش در استان سمنان. راهنمای تشخیص عیوب و نکات نگهداری. تماس: ${PHONE_NUMBER}`;
+---
+
+<Layout
+  title={metaTitle}
+  description={metaDesc}
+  canonical={canonical}
+  ogImage={ogImage}
+  schemas={schemas}
+>
+  <nav class="breadcrumb">
+    <a href="/">خانه</a><span>›</span> بلاگ
+  </nav>
+
+  <h1>بلاگ سمنان سرویس</h1>
+
+  <div class="intro-section">
+    <p>در بلاگ {SITE_NAME} مقالات تخصصی درباره تعمیر لوازم خانگی، امداد خودرو و یدک‌کش در استان سمنان منتشر می‌شود. هدف ما کمک به شما برای تشخیص بهتر مشکلات لوازم خانگی و خودرو و ارائه راهنمایی‌های کاربردی است.</p>
+  </div>
+
+  <div class="card-grid">
+    {blogPosts.map((post) => (
+      <div class="card">
+        <h3><a href={`/بلاگ/${post.slug}/`}>{post.title}</a></h3>
+        <p>{post.excerpt.substring(0, 120)}...</p>
+        <p class="card-meta">
+          <span>{post.dateDisplay}</span>
+          <span>{post.category === 'خودروبر' ? 'خودروبر' : 'تعمیرات'}</span>
+        </p>
+      </div>
+    ))}
+  </div>
+
+  <div class="cta-box">
+    <p>نیاز به تعمیر یا امداد فوری دارید؟</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <div class="up-links">
+    <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+  </div>
+</Layout>
+
+<style>
+  .card-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 8px;
+  }
+</style>

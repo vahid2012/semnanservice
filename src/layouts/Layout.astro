@@ -1,0 +1,740 @@
+---
+import { PHONE_NUMBER, PHONE_INTL, SITE_URL, SITE_NAME } from '../utils/content';
+
+export interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  schemas?: object[];
+  noindex?: boolean;
+  contactName?: string;
+  preloadImage?: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage = `${SITE_URL}/og-default.webp`,
+  schemas = [],
+  noindex = false,
+  contactName = '',
+  preloadImage = '',
+} = Astro.props;
+
+const headerPhoneText = contactName ? `تماس با ${contactName}: ${PHONE_NUMBER}` : `تماس: ${PHONE_NUMBER}`;
+const stickyPhoneText = contactName ? `تماس فوری با ${contactName}: ${PHONE_NUMBER}` : `تماس فوری: ${PHONE_NUMBER}`;
+const footerPhoneText = contactName ? `تماس فوری با ${contactName}: ${PHONE_NUMBER}` : `تماس فوری: ${PHONE_NUMBER}`;
+
+const canonicalUrl = canonical || new URL(Astro.url.pathname, SITE_URL).href;
+
+const allSchemas = [...schemas];
+---
+
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} />}
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    {!noindex && <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content="fa_IR" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="675" />
+    <meta property="og:image:type" content="image/webp" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#0d6e6e" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- JSON-LD Schemas -->
+    {allSchemas.map((schema) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+
+    <!-- GA4 -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <script is:inline>
+      document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href^="tel:"]');
+        if (link) {
+          gtag('event', 'call_click', {
+            'event_category': 'engagement',
+            'event_label': link.href
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="/" class="logo">{SITE_NAME}</a>
+        <nav class="main-nav">
+          <a href="/تعمیرات/لوازم-خانگی/">تعمیرات لوازم خانگی</a>
+          <a href="/خودروبر/">خودروبر و امداد خودرو</a>
+          <a href="/ضایعات/عمده/">ضایعات عمده</a>
+          <a href="/بلاگ/">بلاگ</a>
+          <a href="/درباره-ما/">درباره ما</a>
+        </nav>
+        <a href={`tel:${PHONE_NUMBER}`} class="header-phone" data-ga="call_click">
+          {headerPhoneText}
+        </a>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-col">
+          <h3>{SITE_NAME}</h3>
+          <p>مرکز تخصصی تعمیر لوازم خانگی و امداد خودرو در استان سمنان</p>
+          <p>خدمات ۲۴ ساعته در تمام شهرهای استان سمنان</p>
+        </div>
+        <div class="footer-col">
+          <h3>خدمات تعمیرات</h3>
+          <ul>
+            <li><a href="/تعمیرات/لوازم-خانگی/یخچال/">تعمیر یخچال فریزر</a></li>
+            <li><a href="/تعمیرات/لوازم-خانگی/لباسشویی/">تعمیر ماشین لباسشویی</a></li>
+            <li><a href="/تعمیرات/لوازم-خانگی/کولر-گازی/">تعمیر کولر گازی</a></li>
+            <li><a href="/تعمیرات/لوازم-خانگی/پکیج/">تعمیر پکیج و آبگرمکن</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>شهرهای تحت پوشش</h3>
+          <ul>
+            <li><a href="/تعمیرات/لوازم-خانگی/سمنان/">سمنان</a></li>
+            <li><a href="/تعمیرات/لوازم-خانگی/شاهرود/">شاهرود</a></li>
+            <li><a href="/تعمیرات/لوازم-خانگی/گرمسار/">گرمسار</a></li>
+            <li><a href="/تعمیرات/لوازم-خانگی/دامغان/">دامغان</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>تماس با ما</h3>
+          <p><a href={`tel:${PHONE_NUMBER}`} data-ga="call_click">{footerPhoneText}</a></p>
+          <p>خودروبر و امداد خودرو — آقای ابراهیم همتی: <a href={`tel:${PHONE_NUMBER}`} data-ga="call_click">{PHONE_NUMBER}</a></p>
+          <p>تعمیرات لوازم خانگی — آقای تعمیر: <a href={`tel:${PHONE_NUMBER}`} data-ga="call_click">{PHONE_NUMBER}</a></p>
+          <p>استان سمنان - خدمات سیار ۲۴ ساعته</p>
+          <p><a href="https://nashan.org" target="_blank" rel="noopener">نقشه نشان</a> | <a href="https://balad.ir" target="_blank" rel="noopener">نقشه بلد</a></p>
+          <p><a href="/درباره-ما/">درباره ما</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© ۱۴۰۳ {SITE_NAME} - تمام حقوق محفوظ است</p>
+      </div>
+    </footer>
+
+    <!-- Sticky Call Bar -->
+    <div class="sticky-call-bar">
+      <a href={`tel:${PHONE_NUMBER}`} class="sticky-call-link" data-ga="call_click">
+        <span class="call-icon">📞</span>
+        <span>{stickyPhoneText}</span>
+      </a>
+    </div>
+
+    <style is:global>
+      :root {
+        --color-primary: #0d6e6e;
+        --color-primary-dark: #095050;
+        --color-primary-light: #e0f2f2;
+        --color-secondary: #c8821e;
+        --color-secondary-dark: #a06812;
+        --color-accent: #2b8a8a;
+        --color-success: #2e8b57;
+        --color-warning: #e8a838;
+        --color-error: #c44343;
+        --color-bg: #f8f9fa;
+        --color-surface: #ffffff;
+        --color-text: #1a2a2a;
+        --color-text-light: #5a6a6a;
+        --color-border: #e0e5e5;
+        --color-nav-bg: #0d6e6e;
+        --color-nav-text: #ffffff;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+        --font-body: 'Vazirmatn', system-ui, sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-body);
+        background: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.7;
+        padding-bottom: 60px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        line-height: 1.3;
+        font-weight: 700;
+        color: var(--color-primary-dark);
+        margin-bottom: 0.5em;
+      }
+
+      h1 { font-size: 1.8rem; }
+      h2 { font-size: 1.4rem; margin-top: 2em; }
+      h3 { font-size: 1.2rem; margin-top: 1.5em; }
+
+      p { margin-bottom: 1em; }
+
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      a:hover {
+        color: var(--color-accent);
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-md);
+      }
+
+      ul, ol {
+        padding-right: 1.5em;
+        margin-bottom: 1em;
+      }
+
+      li {
+        margin-bottom: 0.5em;
+      }
+
+      /* Header */
+      .site-header {
+        background: var(--color-primary);
+        color: var(--color-nav-text);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-md);
+      }
+
+      .header-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        gap: 20px;
+      }
+
+      .logo {
+        color: var(--color-nav-text);
+        font-size: 1.3rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .logo:hover {
+        color: var(--color-primary-light);
+      }
+
+      .main-nav {
+        display: flex;
+        gap: 24px;
+      }
+
+      .main-nav a {
+        color: var(--color-nav-text);
+        font-size: 0.95rem;
+        font-weight: 500;
+        padding: 6px 0;
+        border-bottom: 2px solid transparent;
+        transition: border-color 0.2s ease;
+      }
+
+      .main-nav a:hover {
+        color: var(--color-primary-light);
+        border-bottom-color: var(--color-primary-light);
+      }
+
+      .header-phone {
+        background: var(--color-secondary);
+        color: #fff !important;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        transition: background 0.2s ease;
+      }
+
+      .header-phone:hover {
+        background: var(--color-secondary-dark);
+      }
+
+      /* Main */
+      .site-main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 30px 20px;
+      }
+
+      .site-main img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* Footer */
+      .site-footer {
+        background: var(--color-primary-dark);
+        color: #c0d8d8;
+        padding: 40px 20px 20px;
+        margin-top: 40px;
+      }
+
+      .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 30px;
+      }
+
+      .footer-col h3 {
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+      }
+
+      .footer-col ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .footer-col li {
+        margin-bottom: 8px;
+      }
+
+      .footer-col a {
+        color: #a0c8c8;
+        font-size: 0.9rem;
+      }
+
+      .footer-col a:hover {
+        color: #fff;
+      }
+
+      .footer-bottom {
+        max-width: 1200px;
+        margin: 20px auto 0;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        text-align: center;
+        font-size: 0.85rem;
+        color: #80a0a0;
+      }
+
+      /* Sticky Call Bar */
+      .sticky-call-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--color-secondary);
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      }
+
+      .sticky-call-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 10px 20px;
+        color: #fff !important;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .sticky-call-link:hover {
+        background: var(--color-secondary-dark);
+      }
+
+      .call-icon {
+        font-size: 1.2rem;
+      }
+
+      /* Content styles */
+      .featured-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        margin-bottom: 24px;
+        border-radius: var(--radius-lg);
+      }
+
+      .in-content-image {
+        width: 100%;
+        max-width: 800px;
+        margin: 24px 0;
+        border-radius: var(--radius-md);
+      }
+
+      .breadcrumb {
+        font-size: 0.85rem;
+        color: var(--color-text-light);
+        margin-bottom: 16px;
+      }
+
+      .breadcrumb a {
+        color: var(--color-primary);
+      }
+
+      .breadcrumb span {
+        margin: 0 6px;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 24px 0;
+      }
+
+      .card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        margin-top: 0;
+        font-size: 1.05rem;
+      }
+
+      .card a {
+        font-weight: 500;
+      }
+
+      .cta-box {
+        background: var(--color-primary-light);
+        border: 2px solid var(--color-primary);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        text-align: center;
+        margin: 24px 0;
+      }
+
+      .cta-box p {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        color: var(--color-primary-dark);
+        font-weight: 500;
+      }
+
+      .cta-phone {
+        display: inline-block;
+        background: var(--color-primary);
+        color: #fff !important;
+        padding: 12px 32px;
+        border-radius: var(--radius-sm);
+        font-size: 1.2rem;
+        font-weight: 700;
+        transition: background 0.2s ease;
+      }
+
+      .cta-phone:hover {
+        background: var(--color-primary-dark);
+      }
+
+      .faq-section {
+        margin: 24px 0;
+      }
+
+      .faq-item {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+        margin-bottom: 12px;
+      }
+
+      .faq-item h3 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+        color: var(--color-primary-dark);
+      }
+
+      .review-box {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-right: 4px solid var(--color-secondary);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin: 24px 0;
+      }
+
+      .review-box .stars {
+        color: var(--color-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+      }
+
+      .review-box .reviewer {
+        font-weight: 700;
+        color: var(--color-primary-dark);
+      }
+
+      .horizontal-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .horizontal-links a {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 6px 14px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+      }
+
+      .horizontal-links a:hover {
+        background: var(--color-primary-light);
+        border-color: var(--color-primary);
+      }
+
+      .up-links {
+        background: var(--color-primary-light);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+        margin: 20px 0;
+      }
+
+      .up-links a {
+        font-weight: 500;
+      }
+
+      .issues-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .issues-table th, .issues-table td {
+        border: 1px solid var(--color-border);
+        padding: 12px 16px;
+        text-align: right;
+      }
+
+      .issues-table th {
+        background: var(--color-primary);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .issues-table tr:nth-child(even) td {
+        background: var(--color-bg);
+      }
+
+      .hero-section {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+        color: #fff;
+        border-radius: var(--radius-lg);
+        padding: 40px 30px;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .hero-section h1 {
+        color: #fff;
+        font-size: 2rem;
+        margin-bottom: 16px;
+      }
+
+      .hero-section p {
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto 20px;
+        opacity: 0.95;
+      }
+
+      .hero-section .cta-phone {
+        background: var(--color-secondary);
+      }
+
+      .hero-section .cta-phone:hover {
+        background: var(--color-secondary-dark);
+      }
+
+      .hero-img {
+        width: 100%;
+        max-width: 1200px;
+        height: auto;
+        aspect-ratio: 2 / 1;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        margin-bottom: 20px;
+      }
+
+      .section-img {
+        width: 100%;
+        max-width: 800px;
+        height: auto;
+        aspect-ratio: 8 / 5;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        margin-bottom: 16px;
+      }
+
+      .direct-answer {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        background: var(--color-primary-light);
+        border-right: 4px solid var(--color-primary);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        color: var(--color-text);
+      }
+
+      .intro-section {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        margin-bottom: 24px;
+      }
+
+      .content-section {
+        margin-bottom: 32px;
+      }
+
+      .content-section p {
+        line-height: 1.8;
+      }
+
+      .external-link {
+        color: var(--color-accent);
+        font-weight: 500;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .header-inner {
+          flex-wrap: wrap;
+          padding: 10px 16px;
+        }
+
+        .main-nav {
+          order: 3;
+          width: 100%;
+          justify-content: center;
+          gap: 16px;
+          margin-top: 8px;
+        }
+
+        .main-nav a {
+          font-size: 0.85rem;
+        }
+
+        .logo {
+          font-size: 1.1rem;
+        }
+
+        .header-phone {
+          font-size: 0.85rem;
+          padding: 6px 12px;
+        }
+
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.2rem; }
+
+        .site-main {
+          padding: 20px 16px;
+        }
+
+        .hero-section {
+          padding: 24px 16px;
+        }
+
+        .hero-section h1 {
+          font-size: 1.5rem;
+        }
+
+        .hero-section p {
+          font-size: 1rem;
+        }
+
+        .footer-inner {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .sticky-call-link {
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .main-nav {
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+    </style>
+  </body>
+</html>

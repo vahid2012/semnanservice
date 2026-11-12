@@ -1,0 +1,161 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { blogPosts, getOtherBlogPosts, type BlogPost } from '../../data/blog';
+import {
+  PHONE_NUMBER,
+  SITE_NAME,
+  SITE_URL,
+  generateFAQSchema,
+  generateBreadcrumbSchema,
+  type FaqItem,
+} from '../../utils/content';
+
+export async function getStaticPaths() {
+  return blogPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props as Props;
+const isTowTruck = post.category === 'خودروبر';
+const contactName = isTowTruck ? 'آقای ابراهیم همتی' : 'آقای تعمیر';
+const relatedPosts = getOtherBlogPosts(post.slug, 3);
+
+const canonical = `${SITE_URL}/بلاگ/${post.slug}/`;
+const ogImage = `${SITE_URL}/images/blog/${post.slugEn}-featured.webp`;
+const inContentImage = `/images/blog/${post.slugEn}-incontent.webp`;
+
+const faqs: FaqItem[] = post.faqs;
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.h1,
+  description: post.metaDescription,
+  image: ogImage,
+  author: {
+    '@type': 'Person',
+    name: post.author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE_NAME,
+    telephone: '+989032486073',
+  },
+  datePublished: post.date,
+  dateModified: post.date,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonical,
+  },
+};
+
+const schemas = [
+  articleSchema,
+  generateFAQSchema(faqs),
+  generateBreadcrumbSchema([
+    { name: 'خانه', url: SITE_URL },
+    { name: 'بلاگ', url: `${SITE_URL}/بلاگ/` },
+    { name: post.title, url: canonical },
+  ]),
+];
+---
+
+<Layout
+  title={post.metaTitle}
+  description={post.metaDescription}
+  canonical={canonical}
+  ogImage={ogImage}
+  schemas={schemas}
+  contactName={contactName}
+>
+  <nav class="breadcrumb">
+    <a href="/">خانه</a><span>›</span>
+    <a href="/بلاگ/">بلاگ</a><span>›</span>
+    {post.title}
+  </nav>
+
+  <h1>{post.h1}</h1>
+
+  <img
+    src={`/images/blog/${post.slugEn}-featured.webp`}
+    alt={post.h1}
+    class="featured-image"
+    width="1200"
+    height="675"
+    loading="eager"
+    fetchpriority="high"
+  />
+
+  <div class="article-meta">
+    <span class="meta-author">{post.author}</span>
+    <span class="meta-date">{post.dateDisplay}</span>
+    <span class="meta-category">{isTowTruck ? 'خودروبر و امداد خودرو' : 'تعمیرات لوازم خانگی'}</span>
+  </div>
+
+  <div class="intro-section">
+    <p>{post.excerpt}</p>
+  </div>
+
+  <div class="article-body" set:html={post.bodyHtml} />
+
+  <img
+    src={inContentImage}
+    alt={post.h1}
+    class="in-content-image"
+    width="800"
+    height="600"
+    loading="lazy"
+  />
+
+  <div class="cta-box">
+    <p>نیاز به کمک دارید؟ {contactName}</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <h2>سوالات متداول</h2>
+  <div class="faq-section">
+    {faqs.map((faq) => (
+      <div class="faq-item">
+        <h3>{faq.question}</h3>
+        <p>{faq.answer}</p>
+      </div>
+    ))}
+  </div>
+
+  <h2>مقالات مرتبط</h2>
+  <div class="card-grid">
+    {relatedPosts.map((rp) => (
+      <div class="card">
+        <h3><a href={`/بلاگ/${rp.slug}/`}>{rp.title}</a></h3>
+        <p>{rp.excerpt.substring(0, 100)}...</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="up-links">
+    <p><a href="/بلاگ/">← بازگشت به بلاگ</a></p>
+    <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+  </div>
+</Layout>
+
+<style>
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .meta-author::before { content: '✍️ '; }
+  .meta-date::before { content: '📅 '; }
+  .meta-category::before { content: '🏷️ '; }
+</style>

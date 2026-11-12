@@ -1,0 +1,164 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { cities, getNeighbors, type City } from '../../../data/cities';
+import {
+  PHONE_NUMBER,
+  SITE_NAME,
+  SITE_URL,
+  generateLocalBusinessSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  type FaqItem,
+} from '../../../utils/content';
+
+export async function getStaticPaths() {
+  return cities.map((city) => ({
+    params: { city: city.slug },
+    props: { city },
+  }));
+}
+
+interface Props {
+  city: City;
+}
+
+const { city } = Astro.props as Props;
+const neighbors = getNeighbors(city.slug);
+
+const faqs: FaqItem[] = [
+  {
+    question: `خرید ضایعات در ${city.name} چه نوع لوازمی را شامل می‌شود؟`,
+    answer: `خرید ضایعات در ${city.name} شامل لوازم خانگی اسقاطی، فلزات آهنی و غیرآهنی، مس، آلومینیوم، قطعات خودرو و سایر ضایعات فلزی است. برای اطلاع بیشتر با ${PHONE_NUMBER} تماس بگیرید.`,
+  },
+  {
+    question: `آیا ضایعات را در ${city.name} از محل جمع‌آوری می‌کنید؟`,
+    answer: `بله، برای مقادیر عمده، تیم ما در ${city.name} به محل شما اعزام می‌شود و ضایعات را جمع‌آوری و خریداری می‌کند. با تماس با ${PHONE_NUMBER} درخواست خود را ثبت کنید.`,
+  },
+  {
+    question: `قیمت ضایعات در ${city.name} چقدر است؟`,
+    answer: `قیمت ضایعات در ${city.name} بر اساس نوع ماده و قیمت روز بازار محاسبه می‌شود. مس و آلومینیوم قیمت بالاتری دارند. برای قیمت دقیق با ${PHONE_NUMBER} تماس بگیرید.`,
+  },
+  {
+    question: `خرید ضایعات در کدام محله‌های ${city.name} فعال است؟`,
+    answer: `خرید و جمع‌آوری ضایعات در تمام محله‌های ${city.name} از جمله ${city.neighborhoods.slice(0, 2).join(' و ')} فعال است.`,
+  },
+];
+
+const metaTitle = `خرید ضایعات عمده در ${city.name} | لوازم اسقاطی و فلزی | ${SITE_NAME}`;
+const metaDesc = `خرید ضایعات عمده در ${city.name}. لوازم خانگی اسقاطی، فلزات آهنی و غیرآهنی، مس و آلومینیوم. جمع‌آوری از محل. تماس: ${PHONE_NUMBER}`;
+const canonical = `${SITE_URL}/ضایعات/عمده/${city.slug}/`;
+const ogImage = `${SITE_URL}/images/featured/scrap-${city.slugEn}-featured.webp`;
+
+const schemas = [
+  generateLocalBusinessSchema(city),
+  generateBreadcrumbSchema([
+    { name: 'خانه', url: SITE_URL },
+    { name: 'ضایعات عمده', url: `${SITE_URL}/ضایعات/عمده/` },
+    { name: `خرید ضایعات در ${city.name}`, url: canonical },
+  ]),
+  generateFAQSchema(faqs),
+];
+---
+
+<Layout
+  title={metaTitle}
+  description={metaDesc}
+  canonical={canonical}
+  ogImage={ogImage}
+  schemas={schemas}
+  noindex={!city.indexed}
+>
+  <nav class="breadcrumb">
+    <a href="/">خانه</a><span>›</span>
+    <a href="/ضایعات/عمده/">ضایعات عمده</a><span>›</span>
+    خرید ضایعات در {city.name}
+  </nav>
+
+  <h1>خرید ضایعات عمده در {city.name}</h1>
+
+  <img
+    src={`/images/featured/scrap-${city.slugEn}-featured.webp`}
+    alt={`خرید ضایعات عمده در ${city.name}`}
+    class="featured-image"
+    width="1200"
+    height="675"
+    loading="eager"
+    fetchpriority="high"
+  />
+
+  <div class="intro-section">
+    <p>خرید ضایعات عمده در {city.name} توسط {SITE_NAME} با قیمت روز و منصفانه ارائه می‌شود. شهر {city.name} با جمعیت {city.population} نفر و محله‌هایی مانند {city.neighborhoods.slice(0, 3).join('، ')}، نیازمند خدمات جمع‌آوری و خرید ضایعات است. {city.callout} و ما با تیم سیار خود در تمام محله‌های {city.name} حاضر هستیم.</p>
+
+    <p>با توجه به آب‌وهوای {city.climate} در {city.name}، لوازم خانگی زودتر فرسوده و اسقاط می‌شوند. فروش ضایعات در {city.name} نه تنها به آزاد شدن فضا کمک می‌کند، بلکه درآمد اقتصادی نیز به همراه دارد. با تماس با شماره {PHONE_NUMBER}، تیم ما به محل شما در {city.name} اعزام می‌شود.</p>
+  </div>
+
+  <div class="cta-box">
+    <p>برای فروش ضایعات در {city.name} تماس بگیرید</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <h2>انواع ضایعات خریداری شده در {city.name}</h2>
+  <ul>
+    <li>لوازم خانگی اسقاطی در {city.name} (یخچال، لباسشویی، ظرفشویی، تلویزیون و...)</li>
+    <li>فلزات آهنی در {city.name} (آهن، فولاد، ورق فلزی)</li>
+    <li>فلزات غیرآهنی در {city.name} (مس، آلومینیوم، برنج، سرب)</li>
+    <li>قطعات خودرو اسقاطی در {city.name}</li>
+    <li>لوازم بر قدیمی در {city.name}</li>
+  </ul>
+
+  <h2>محله‌های تحت پوشش در {city.name}</h2>
+  <div class="horizontal-links">
+    {city.neighborhoods.map((n) => (
+      <span class="card" style="display:inline-block; padding: 8px 16px;">{n}</span>
+    ))}
+  </div>
+
+  <img
+    src={`/images/in-content/scrap-${city.slugEn}-incontent.webp`}
+    alt={`جمع‌آوری ضایعات فلزی در ${city.name}`}
+    class="in-content-image"
+    width="800"
+    height="600"
+    loading="lazy"
+  />
+
+  <h2>قیمت ضایعات در {city.name}</h2>
+  <table class="issues-table">
+    <thead>
+      <tr><th>نوع ضایعات</th><th>قیمت حدودی در {city.name}</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>آهن قراضه</td><td>۸٬۰۰۰ تا ۱۵٬۰۰۰ تومان/کیلوگرم</td></tr>
+      <tr><td>مس قراضه</td><td>۸۰٬۰۰۰ تا ۱۲۰٬۰۰۰ تومان/کیلوگرم</td></tr>
+      <tr><td>آلومینیوم قراضه</td><td>۴۰٬۰۰۰ تا ۶۰٬۰۰۰ تومان/کیلوگرم</td></tr>
+      <tr><td>لوازم خانگی اسقاطی</td><td>بسته به نوع و وزن</td></tr>
+    </tbody>
+  </table>
+
+  <h2>خرید ضایعات در شهرهای همجوار</h2>
+  <div class="horizontal-links">
+    {neighbors.map((nc) => (
+      <a href={`/ضایعات/عمده/${nc.slug}/`}>خرید ضایعات در {nc.name}</a>
+    ))}
+  </div>
+
+  <h2>سوالات متداول خرید ضایعات در {city.name}</h2>
+  <div class="faq-section">
+    {faqs.map((faq) => (
+      <div class="faq-item">
+        <h3>{faq.question}</h3>
+        <p>{faq.answer}</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="cta-box">
+    <p>برای فروش ضایعات در {city.name} تماس بگیرید</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <div class="up-links">
+    <p><a href="/ضایعات/عمده/">← ضایعات عمده در استان سمنان</a></p>
+    <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+  </div>
+</Layout>

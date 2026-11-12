@@ -1,0 +1,194 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { cities, getNeighbors, type City } from '../../data/cities';
+import {
+  PHONE_NUMBER,
+  SITE_NAME,
+  SITE_URL,
+  generateLocalBusinessSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  generateDirectAnswerTowTruck,
+  type FaqItem,
+} from '../../utils/content';
+
+export async function getStaticPaths() {
+  return cities.map((city) => ({
+    params: { city: city.slug },
+    props: { city },
+  }));
+}
+
+interface Props {
+  city: City;
+}
+
+const { city } = Astro.props as Props;
+const neighbors = getNeighbors(city.slug);
+
+const faqs: FaqItem[] = [
+  {
+    question: `امداد خودرو در ${city.name} چه ساعاتی فعال است؟`,
+    answer: `خدمات امداد خودرو و یدک‌کش در ${city.name} به صورت ۲۴ ساعته و ۷ روز هفته ارائه می‌شود. با تماس با شماره ${PHONE_NUMBER} در هر ساعت از شبانه‌روز، تیم امداد به محل شما در ${city.name} اعزام می‌شود.`,
+  },
+  {
+    question: `هزینه یدک‌کش در ${city.name} چقدر است؟`,
+    answer: `هزینه یدک‌کش در ${city.name} بسته به مسافت و نوع خودرو متغیر است. قیمت پایه از ۳۰۰ هزار تومان شروع می‌شود. برای اطلاع از هزینه دقیق با ${PHONE_NUMBER} تماس بگیرید.`,
+  },
+  {
+    question: `آیا امداد خودرو در جاده‌های اطراف ${city.name} ارائه می‌شود؟`,
+    answer: `بله، تیم امداد خودرو ما در تمام جاده‌های اطراف ${city.name} خدمات ارائه می‌دهد. با توجه به اینکه ${city.name} در فاصله ${city.distanceFromSemnan} مرکز استان قرار دارد، امداد در جاده‌های بین‌شهری نیز ارائه می‌شود.`,
+  },
+  {
+    question: `امداد خودرو در محله‌های ${city.name} چه زمانی می‌رسد؟`,
+    answer: `زمان رسیدن امداد خودرو به محله‌های ${city.name} معمولاً کمتر از ۱ ساعت است. در محله‌های ${city.neighborhoods.slice(0, 2).join(' و ')} زمان رسیدن کمتر از ۴۵ دقیقه است.`,
+  },
+];
+
+const metaTitle = `امداد خودرو و یدک‌کش در ${city.name} | فوری ۲۴ ساعته | ${SITE_NAME}`;
+const metaDesc = `امداد خودرو و یدک‌کش فوری در ${city.name}. خدمات ۲۴ ساعته در تمام محله‌های ${city.name} و جاده‌های اطراف. تماس: ${PHONE_NUMBER}`;
+const canonical = `${SITE_URL}/خودروبر/${city.slug}/`;
+const ogImage = `${SITE_URL}/images/featured/towtruck-${city.slugEn}-featured.webp`;
+
+const directAnswer = generateDirectAnswerTowTruck(city);
+
+const schemas = [
+  generateLocalBusinessSchema(city),
+  generateBreadcrumbSchema([
+    { name: 'خانه', url: SITE_URL },
+    { name: 'خودروبر و امداد خودرو', url: `${SITE_URL}/خودروبر/` },
+    { name: `امداد خودرو در ${city.name}`, url: canonical },
+  ]),
+  generateFAQSchema(faqs),
+];
+---
+
+<Layout
+  title={metaTitle}
+  description={metaDesc}
+  canonical={canonical}
+  ogImage={ogImage}
+  schemas={schemas}
+  contactName="آقای ابراهیم همتی"
+  noindex={!city.indexed}
+>
+  <nav class="breadcrumb">
+    <a href="/">خانه</a><span>›</span>
+    <a href="/خودروبر/">خودروبر و امداد خودرو</a><span>›</span>
+    امداد خودرو در {city.name}
+  </nav>
+
+  <h1>امداد خودرو و یدک‌کش در {city.name}</h1>
+
+  <p class="direct-answer">{directAnswer}</p>
+
+  <img
+    src={`/images/featured/towtruck-${city.slugEn}-featured.webp`}
+    alt={`امداد خودرو و یدک‌کش در ${city.name}`}
+    class="featured-image"
+    width="1200"
+    height="675"
+    loading="eager"
+    fetchpriority="high"
+  />
+
+  <div class="intro-section">
+    <p>امداد خودرو و یدک‌کش در {city.name} یکی از خدمات مهم {SITE_NAME} است. شهر {city.name} با جمعیت {city.population} نفر و محله‌های متعددی مانند {city.neighborhoods.slice(0, 3).join('، ')}، نیازمند خدمات امداد خودرو سریع و قابل اعتماد است. {city.callout} و تیم امداد خودرو ما در {city.name} آماده ارائه خدمات ۲۴ ساعته است.</p>
+
+    <p>با توجه به اینکه {city.name} دارای آب‌وهوای {city.climate} است و در فاصله {city.distanceFromSemnan} مرکز استان قرار دارد، خرابی خودرو در این منطقه می‌تواند چالش‌برانگیز باشد. تیم امداد خودرو {SITE_NAME} با یدک‌کش‌های مجهز و رانندگان حرفه‌ای، در تمام محله‌های {city.name} و جاده‌های اطراف آن حاضر است. با تماس با شماره {PHONE_NUMBER}، نزدیک‌ترین یدک‌کش به محل شما در {city.name} اعزام می‌شود.</p>
+  </div>
+
+  <div class="cta-box">
+    <p>نیاز به امداد فوری خودرو در {city.name} دارید؟</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <h2>چه خدمات امداد خودرو‌ای در {city.name} ارائه می‌شود؟</h2>
+  <ul>
+    <li><strong>یدک‌کش فوری در {city.name}:</strong> اعزام یدک‌کش سبک و سنگین برای انتقال خودرو در تمام محله‌های {city.name}.</li>
+    <li><strong>باتری‌Boost در {city.name}:</strong> راه‌اندازی اضطراری خودرو در صورت خالی شدن باتری در {city.name}.</li>
+    <li><strong>تعویض لاستیک اضطراری در {city.name}:</strong> تعویض لاستیک پنچر شده در محل در {city.name}.</li>
+    <li><strong>سوفت‌رسانی در {city.name}:</strong> رساندن سوخت اضطراری به خودروهای متوقف شده در {city.name} و جاده‌های اطراف.</li>
+    <li><strong>انتقال به تعمیرگاه:</strong> انتقال خودرو خراب به تعمیرگاه مورد نظر در {city.name} یا شهرهای مجاور.</li>
+  </ul>
+
+  <h2>کدام محله‌های {city.name} تحت پوشش امداد خودرو هستند؟</h2>
+  <div class="horizontal-links">
+    {city.neighborhoods.map((n) => (
+      <span class="card" style="display:inline-block; padding: 8px 16px;">{n}</span>
+    ))}
+  </div>
+
+  <img
+    src={`/images/in-content/towtruck-${city.slugEn}-incontent.webp`}
+    alt={`یدک‌کش و امداد خودرو در محله‌های ${city.name}`}
+    class="in-content-image"
+    width="800"
+    height="600"
+    loading="lazy"
+  />
+
+  <h2>هزینه امداد خودرو در {city.name} چقدر است؟</h2>
+  <p>هزینه امداد خودرو در {city.name} بسته به نوع خدمات متغیر است:</p>
+  <table class="issues-table">
+    <thead>
+      <tr><th>نوع خدمت</th><th>محدوده قیمت در {city.name}</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>یدک‌کش در داخل {city.name}</td><td>۳۰۰٬۰۰۰ تا ۵۰۰٬۰۰۰ تومان</td></tr>
+      <tr><td>باتری‌Boost در {city.name}</td><td>۱۵۰٬۰۰۰ تا ۳۰۰٬۰۰۰ تومان</td></tr>
+      <tr><td>تعویض لاستیک در {city.name}</td><td>۱۰۰٬۰۰۰ تا ۲۵۰٬۰۰۰ تومان</td></tr>
+      <tr><td>سوفت‌رسانی در {city.name}</td><td>۲۰۰٬۰۰۰ تا ۴۰۰٬۰۰۰ تومان</td></tr>
+    </tbody>
+  </table>
+
+  <h2>آب‌وهوای {city.name} چه تأثیری بر امداد خودرو دارد؟</h2>
+  <p>شهر {city.name} با آب‌وهوای {city.climate}، چالش‌های خاصی برای رانندگان ایجاد می‌کند. {city.callout} و این موضوع اهمیت خدمات امداد خودرو ۲۴ ساعته در {city.name} را دوچندان می‌کند. در تابستان‌های گرم {city.name}، خرابی خنک‌کننده خودرو و در زمستان‌های سرد، خرابی باتری و یخ زدن رادیاتور از شایع‌ترین دلایل نیاز به امداد خودرو است.</p>
+
+  {city.slug === 'سمنان' && (
+    <section class="content-section">
+      <h2>منابع و مراجع محلی</h2>
+      <p>برای آشنایی با خدمات تخصصی امداد خودرو در سمنان، می‌توانید به <a href="https://www.hamyar-khodro.ir/emdad-khodro-semnan" rel="noopener" target="_blank" class="external-link">امداد خودرو و یدک کش سمنان</a> مراجعه کنید. این منبع شامل اطلاعات مفیدی درباره خدمات roadside assistance در منطقه است.</p>
+    </section>
+  )}
+
+  {city.slug === 'گرمسار' && (
+    <section class="content-section">
+      <h2>منابع و مراجع محلی</h2>
+      <p>برای آشنایی با خدمات امداد خودرو در گرمسار، می‌توانید به <a href="https://www.emdadkhodro-semnan.ir/امداد-خودرو-گرمسار/" rel="noopener" target="_blank" class="external-link">امداد خودرو گرمسار</a> مراجعه کنید. این منبع شامل اطلاعات مفیدی درباره خدمات یدک‌کش در منطقه گرمسار است.</p>
+    </section>
+  )}
+
+  <h2>امداد خودرو در شهرهای همجوار {city.name} چگونه است؟</h2>
+  <div class="horizontal-links">
+    {neighbors.map((nc) => (
+      <a href={`/خودروبر/${nc.slug}/`}>امداد خودرو در {nc.name}</a>
+    ))}
+  </div>
+
+  <h2>سوالات متداول درباره امداد خودرو در {city.name} چیست؟</h2>
+  <div class="faq-section">
+    {faqs.map((faq) => (
+      <div class="faq-item">
+        <h3>{faq.question}</h3>
+        <p>{faq.answer}</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="review-box">
+    <div class="stars">{'★'.repeat(city.localReview.rating)}</div>
+    <p>«{city.localReview.text}»</p>
+    <p class="reviewer">— {city.localReview.customerName}، {city.name} ({city.localReview.date})</p>
+  </div>
+
+  <div class="cta-box">
+    <p>برای امداد فوری خودرو در {city.name} تماس بگیرید</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </div>
+
+  <div class="up-links">
+    <p><a href="/خودروبر/">← خودروبر و امداد خودرو در استان سمنان</a></p>
+    <p><a href="/">← بازگشت به صفحه اصلی</a></p>
+  </div>
+</Layout>

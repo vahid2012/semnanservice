@@ -1,0 +1,90 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { cities } from '../data/cities';
+import { appliances } from '../data/appliances';
+import { PHONE_NUMBER, SITE_NAME, SITE_URL, generateLocalBusinessSchema } from '../utils/content';
+
+const schemas = [generateLocalBusinessSchema()];
+const ogImage = `${SITE_URL}/images/og-homepage.webp`;
+---
+
+<Layout
+  title={`${SITE_NAME} | تعمیرات لوازم خانگی و امداد خودرو در استان سمنان`}
+  description={`مرکز تخصصی تعمیر لوازم خانگی و امداد خودرو در استان سمنان. تعمیر یخچال، لباسشویی، کولر گازی، پکیج و سایر لوازم خانگی در ۲۲ شهر استان. تماس فوری: ${PHONE_NUMBER}`}
+  schemas={schemas}
+  ogImage={ogImage}
+  preloadImage="/images/hero-homepage.webp"
+>
+  <section class="hero-section">
+    <img src="/images/hero-homepage.webp" alt="تعمیرات لوازم خانگی و امداد خودرو در استان سمنان" width="1200" height="600" loading="eager" fetchpriority="high" class="hero-img" />
+    <h1>تعمیرات لوازم خانگی و امداد خودرو در استان سمنان</h1>
+    <p>مرکز تخصصی {SITE_NAME} با تیمی از تکنسین‌های حرفه‌ای، خدمات تعمیر تمام انواع لوازم خانگی و امداد خودرو را در ۲۲ شهر استان سمنان ارائه می‌دهد. خدمات امداد فوری در همان روز با قطعات اصل و ضمانت.</p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">تماس فوری: {PHONE_NUMBER}</a>
+  </section>
+
+  <section class="content-section">
+    <img src="/images/repair-homepage.webp" alt="تعمیرکار متخصص در حال تعمیر لوازم خانگی" width="800" height="500" loading="lazy" class="section-img" />
+    <h2>خدمات تعمیر لوازم خانگی</h2>
+    <p>{SITE_NAME} با بیش از ۱۰ سال تجربه در تعمیر لوازم خانگی در استان سمنان، تیمی متخصص و مجرب را در تمام شهرهای استان گرد هم آورده است. ما تعمیر تمام برندهای لوازم خانگی ایرانی و خارجی را با قطعات اصل و ضمانت ارائه می‌دهیم.</p>
+    <div class="card-grid">
+      {appliances.map((appliance) => (
+        <div class="card">
+          <h3><a href={`/تعمیرات/لوازم-خانگی/${appliance.slug}/`}>تعمیر {appliance.name}</a></h3>
+          <p>{appliance.uniqueIntro.substring(0, 100)}...</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>شهرهای تحت پوشش در استان سمنان</h2>
+    <p>ما در تمام ۲۰ شهر استان سمنان خدمات تعمیر لوازم خانگی و امداد خودرو ارائه می‌دهیم. در هر شهر، تکنسین‌های نزدیک به شما اعزام می‌شوند تا در کمترین زمان ممکن مشکل شما را برطرف کنند.</p>
+    <div class="card-grid">
+      {cities.map((city) => (
+        <div class="card">
+          <h3><a href={`/تعمیرات/لوازم-خانگی/${city.slug}/`}>تعمیر لوازم خانگی در {city.name}</a></h3>
+          <p>{city.callout}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <img src="/images/towtruck-homepage.webp" alt="خودروبر و امداد خودرو در استان سمنان" width="800" height="600" loading="lazy" class="section-img" />
+    <h2>امداد خودرو و خودروبر</h2>
+    <p>علاوه بر تعمیرات لوازم خانگی، {SITE_NAME} خدمات امداد خودرو و خودروبر را نیز در تمام شهرهای استان سمنان ارائه می‌دهد. در صورت خرابی خودرو در جاده‌ها یا داخل شهر، با یک تماس تیم امداد ما به محل شما اعزام می‌شود.</p>
+    <div class="card-grid">
+      <div class="card">
+        <h3><a href="/خودروبر/">خودروبر و امداد خودرو</a></h3>
+        <p>خدمات یدک‌کش و امداد خودرو در تمام شهرهای استان سمنان</p>
+      </div>
+      <div class="card">
+        <h3><a href="/خودروبر/سمنان/">امداد خودرو در سمنان</a></h3>
+        <p>امداد فوری خودرو و یدک‌کش در شهر سمنان</p>
+      </div>
+      <div class="card">
+        <h3><a href="/ضایعات/عمده/">ضایعات عمده</a></h3>
+        <p>خرید و فروش ضایعات فلزی و لوازم خانگی اسقاطی</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-box">
+    <p><strong>خودروبر و امداد خودرو — آقای ابراهیم همتی</strong></p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">{PHONE_NUMBER}</a>
+    <p style="margin-top: 16px;"><strong>تعمیرات لوازم خانگی — آقای تعمیر</strong></p>
+    <a href={`tel:${PHONE_NUMBER}`} class="cta-phone" data-ga="call_click">{PHONE_NUMBER}</a>
+  </section>
+
+  <section class="content-section">
+    <h2>چرا {SITE_NAME}؟</h2>
+    <ul>
+      <li><strong>تکنسین متخصص:</strong> تمام تعمیرکارهای ما دارای مدرک تخصصی و سال‌ها تجربه هستند.</li>
+      <li><strong>قطعات اصل:</strong> ما فقط از قطعات اصل و باکیفیت استفاده می‌کنیم.</li>
+      <li><strong>ضمانت خدمات:</strong> تمام تعمیرات ما با ضمانت قطعات و خدمات ارائه می‌شود.</li>
+      <li><strong>امداد همان روز:</strong> تکنسین در کمترین زمان ممکن به منزل شما اعزام می‌شود.</li>
+      <li><strong>قیمت منصفانه:</strong> هزینه تعمیر قبل از شروع کار به شفاف‌ترین شکل اعلام می‌شود.</li>
+      <li><strong>پوشش گسترده:</strong> خدمات در تمام ۲۰ شهر استان سمنان ارائه می‌شود.</li>
+    </ul>
+  </section>
+</Layout>
