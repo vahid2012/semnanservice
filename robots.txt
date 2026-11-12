@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://semnan-service.ir/sitemap-index.xml
